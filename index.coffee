@@ -83,30 +83,6 @@ to_resized = (in_gif_path, new_size) ->
   exec_sync "rm #{in_gif_path}"
   new_path
 
-# If the to_webm query param is given (any truthy value)
-# then one of two functions are called:
-# - if transparency param was truthy, then to_webm_alpha
-# - otherwise, to_webm
-#
-# These commands will not work in place of one another,
-# which is why compile_video uses the was_made_transparent
-# variable to track what occurred.
-# 
-# This requires ffmpeg to be installed on the system
-#
-to_webm_regular = (in_gif_path) ->
-  new_path = gen_path("webm")
-  exec_sync """
-    ffmpeg -i #{in_gif_path} -c:v libvpx -crf 12 -b:v 500K #{new_path}
-  """
-  exec_sync "rm #{in_gif_path}"
-  new_path
-
-# Converts a gif to webm but in a codec that preserves
-# the transparency.
-#
-# Require ffmpeg to be installed on the system
-#
 to_webm_alpha = (in_gif_path) ->
   new_path = gen_path("webm")
   tmp_png_path = gen_tmp_png_path()
@@ -130,23 +106,16 @@ compile_video = (remaining_request) ->
   path = "#{asset_dir}/#{randomstring.generate()}.gif"
   exec_sync "cp #{full_path} #{path}"
 
-  was_made_transparent = false
-
   { transparent, resize, to_webm, color, fuzz } = query
-  console.log query
 
   if transparent
     path = to_transparent_gif(path, color, fuzz)
-    was_made_transparent = true
 
   if resize
     path = to_resized(path, resize) 
 
   if to_webm
-    # if was_made_transparent
     path = to_webm_alpha(path)
-    # else
-    #   path = to_webm_regular(path)
 
   path
   
