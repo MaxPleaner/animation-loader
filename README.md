@@ -24,17 +24,17 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
 
 2. _System dependencies_  
 
-   This loader makes use of childProcess calls and requires the system to have 
-   these Unix programs (these instructions for Ubuntu, but they're common libraries and should be available 
-   on most distributions and osX):
+    This loader makes use of childProcess calls and requires the system to have 
+    these Unix programs (these instructions for Ubuntu, but they're common libraries and should be available 
+    on most distributions and osX):
     ```sh
     sudo apt-get install ffmpeg imagemagick
     ```
 
 2. In `webpack.config.js`:  
 
-   This sets up `loader.coffee` to be the entry point of the application.  
-   `bundle.js` is an in-memory concatenation built by webpack.  
+    This sets up `loader.coffee` to be the entry point of the application.  
+    `bundle.js` is an in-memory concatenation built by webpack.  
     ```js
     module.exports = {
       entry: './loader.coffee',
@@ -58,31 +58,31 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
 
 3. Place the following gif saved as `octopus.gif` in the root of the repo:  
 
-   _note_ I i did not create this, got it by literally searching google images for 'gif'
-  
-  ![octopus gif](./octopus.gif)
+    _note_ I i did not create this, got it by literally searching google images for 'gif'  
+    
+    ![octopus gif](./octopus.gif)
 
 
 4. Add this small `index.html` file:  
 
-  ```html
-  <!doctype html>
-  <html lang="en">
+    ```html
+    <!doctype html>
+    <html lang="en">
       <head></head>
       <body><script src="bundle.js"></script></body>
-  </html>
-  ```
+    </html>
+    ```
 
 5. Populate `loader.coffee` with this:  
 
-  ```coffee
-  $ = require 'jquery'
-  $ ->
-    webm_path = require "./octopus.gif?transparent=true&color=00AEFF&resize=150x100"
-    $("body").append($ """
-      <video autoplay loop src="./#{foo}">
-    """)
-  ```
+    ```coffee
+    $ = require 'jquery'
+    $ ->
+      webm_path = require "./octopus.gif?transparent=true&color=00AEFF&resize=150x100"
+      $("body").append($ """
+        <video autoplay loop src="./#{foo}">
+      """)
+    ```
 
   I should mention that I don't feel this require string is very pretty, but webpack
   requires every string passed to require be statically analyzable and therefore it can have no
@@ -113,7 +113,7 @@ console.log the_path
 Anything else is found in the query params. Here is the full list of keys:
 
 - `transparent` if this is truthy then the following keys are checked (only `color` is required):
-  - `color` a hex code like `000000` (black) or `FFFFFF` (white)
-  - `fuzz` (defaults to 25) the percent leniency when turning color into transparency
+    - `color` a hex code like `000000` (black) or `FFFFFF` (white)
+    - `fuzz` (defaults to 25) the percent leniency when turning color into transparency
 - `resize` the value is a width/height such as `"1400x1400"`
 - `to_webm` a boolean. the output path will be webm
