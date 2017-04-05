@@ -84,6 +84,10 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
     """)
   ```
 
+  I should mention that I don't feel this require string is very pretty, but webpack
+  requires every string passed to require be statically analyzable and therefore it can have no
+  variables. At least it's terse :D
+
 6. Start the server with `npm run dev` and visit http://localhost:8080
 
 7. Observe the following image now present on the page:  
