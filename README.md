@@ -59,7 +59,7 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
 3. Place the following gif saved as `octopus.gif` in the root of the repo:  
 
     _note_ I i did not create this, got it by literally searching google images for 'gif'  
-    
+
     ![octopus gif](./octopus.gif)
 
 
@@ -83,10 +83,10 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
         <video autoplay loop src="./#{foo}">
       """)
     ```
-
-  I should mention that I don't feel this require string is very pretty, but webpack
-  requires every string passed to require be statically analyzable and therefore it can have no
-  variables. At least it's terse :D
+    
+    I should mention that I don't feel this require string is very pretty, but webpack
+    requires every string passed to require be statically analyzable and therefore it can have no
+    variables. At least it's terse :D
 
 6. Start the server with `npm run dev` and visit http://localhost:8080
 
