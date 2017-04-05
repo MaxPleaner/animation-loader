@@ -88,7 +88,7 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
 
 7. Observe the following image now present on the page:  
 
-   ![modified gif](./modified-octopus.webm)  
+   ![modified gif](./modified-octopus.gif)  
 
    It has been resized and also made transparent on the light blue color `#00AEFF`.  
 
