@@ -79,7 +79,7 @@ to_transparent_gif = (in_gif_path, color, fuzz) ->
 #
 to_resized = (in_gif_path, new_size) ->
   new_path = gen_path("gif")
-  exec_sync "convert #{in_gif_path} -resize #{new_size}! #{new_path}"
+  exec_sync "convert #{in_gif_path} -coalesce -resize #{new_size}! #{new_path}"
   exec_sync "rm #{in_gif_path}"
   new_path
 

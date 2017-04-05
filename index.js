@@ -36,7 +36,7 @@
   to_resized = function(in_gif_path, new_size) {
     var new_path;
     new_path = gen_path("gif");
-    exec_sync(`convert ${in_gif_path} -resize ${new_size}! ${new_path}`);
+    exec_sync(`convert ${in_gif_path} -coalesce -resize ${new_size}! ${new_path}`);
     exec_sync(`rm ${in_gif_path}`);
     return new_path;
   };
