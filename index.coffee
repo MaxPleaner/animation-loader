@@ -1,3 +1,4 @@
+require 'colors'
 loader_utils = require 'loader-utils'
 
 # node's method to execute shell commands synchronously
@@ -50,6 +51,8 @@ gen_tmp_png_path = ->
 # This requires imagemagick to be installed on the system.
 #
 to_transparent_gif = (in_gif_path, color, fuzz) ->
+  console.log "making transparent".yellow
+
   # fuzz defaults to a small amount
   fuzz ||= 25 
   # color defaults to black
@@ -78,6 +81,8 @@ to_transparent_gif = (in_gif_path, color, fuzz) ->
 # This requires imagemagick on the system.
 #
 to_resized = (in_gif_path, new_size) ->
+  console.log "resizing".yellow
+
   new_path = gen_path("gif")
   exec_sync "convert #{in_gif_path} -coalesce -resize #{new_size}! #{new_path}"
   exec_sync "rm #{in_gif_path}"
@@ -86,8 +91,12 @@ to_resized = (in_gif_path, new_size) ->
 to_webm_alpha = (in_gif_path) ->
   new_path = gen_path("webm")
   tmp_png_path = gen_tmp_png_path()
+
+  console.log "converting to webm - creating png frames".yellow
+  exec_sync "convert #{in_gif_path} -coalesce #{tmp_png_path}"
+
+  console.log "converting to webm - combining frames".yellow
   exec_sync """
-    convert #{in_gif_path} -coalesce #{tmp_png_path}
     ffmpeg -f image2 -i #{tmp_png_path} -c:v libvpx -pix_fmt yuva420p #{new_path}
     rm #{asset_dir}/*png
   """
@@ -106,6 +115,9 @@ compile_video = (remaining_request) ->
   path = "#{asset_dir}/#{randomstring.generate()}.gif"
   exec_sync "cp #{full_path} #{path}"
 
+  console.log "compiling gif: #{full_path} with params:".yellow
+  console.log query
+
   { transparent, resize, to_webm, color, fuzz } = query
 
   if transparent
@@ -117,6 +129,7 @@ compile_video = (remaining_request) ->
   if to_webm
     path = to_webm_alpha(path)
 
+  console.log "done".green
   path
   
 # The exported function

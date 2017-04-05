@@ -1,9 +1,10 @@
 {
   "name": "animation-loader",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "maxpleaner",
   "description": "webpack loader for manipulating gifs and converting to webm",
   "dependencies": {
+    "colors": "^1.1.2",
     "loader-utils": "^1.0.2",
     "querystring": "^0.2.0",
     "randomstring": "^1.1.5",

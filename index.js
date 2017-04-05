@@ -2,6 +2,8 @@
 (function() {
   var asset_dir, compile_video, exec_sync, gen_path, gen_tmp_png_path, loader_utils, querystring_parser, randomstring, to_resized, to_transparent_gif, to_webm_alpha;
 
+  require('colors');
+
   loader_utils = require('loader-utils');
 
   exec_sync = require('child_process').execSync;
@@ -24,6 +26,7 @@
 
   to_transparent_gif = function(in_gif_path, color, fuzz) {
     var cmd, new_path;
+    console.log("making transparent".yellow);
     fuzz || (fuzz = 25);
     color || (color = "000000");
     new_path = gen_path("gif");
@@ -35,6 +38,7 @@
 
   to_resized = function(in_gif_path, new_size) {
     var new_path;
+    console.log("resizing".yellow);
     new_path = gen_path("gif");
     exec_sync(`convert ${in_gif_path} -coalesce -resize ${new_size}! ${new_path}`);
     exec_sync(`rm ${in_gif_path}`);
@@ -45,7 +49,10 @@
     var new_path, tmp_png_path;
     new_path = gen_path("webm");
     tmp_png_path = gen_tmp_png_path();
-    exec_sync(`convert ${in_gif_path} -coalesce ${tmp_png_path}\nffmpeg -f image2 -i ${tmp_png_path} -c:v libvpx -pix_fmt yuva420p ${new_path}\nrm ${asset_dir}/*png`);
+    console.log("converting to webm - creating png frames".yellow);
+    exec_sync(`convert ${in_gif_path} -coalesce ${tmp_png_path}`);
+    console.log("converting to webm - combining frames".yellow);
+    exec_sync(`ffmpeg -f image2 -i ${tmp_png_path} -c:v libvpx -pix_fmt yuva420p ${new_path}\nrm ${asset_dir}/*png`);
     exec_sync(`rm ${in_gif_path}`);
     return new_path;
   };
@@ -56,6 +63,8 @@
     query = querystring_parser.parse(querystring);
     path = `${asset_dir}/${randomstring.generate()}.gif`;
     exec_sync(`cp ${full_path} ${path}`);
+    console.log(`compiling gif: ${full_path} with params:`.yellow);
+    console.log(query);
     transparent = query.transparent, resize = query.resize, to_webm = query.to_webm, color = query.color, fuzz = query.fuzz;
     if (transparent) {
       path = to_transparent_gif(path, color, fuzz);
@@ -66,6 +75,7 @@
     if (to_webm) {
       path = to_webm_alpha(path);
     }
+    console.log("done".green);
     return path;
   };
 

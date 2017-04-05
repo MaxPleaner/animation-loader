@@ -97,6 +97,16 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
    It has been resized and also made transparent on the light blue color `#00AEFF`.  
 
 
+### Other notes
+
+The `webm_overlay_assets` folder will grow in size as the project gets used for longer. Since everything in there can be dynamically generated, it should be
+occasionally cleared out and also added to `.gitignore`.
+
+Phaser has a way to scale videos, so resizing them in a preprocessor is not
+necessarily needed. However it can improve the performance. Also, scaling in
+Phaser is done with percentages and not width/height so it's probably easier to
+use the preprocessor anyway.
+
 ### API details
 
 Once the webpack setup is in place, there's only one place this loader becomes relevant and that's `require`. With the proper
