@@ -1,21 +1,25 @@
 {
-  "name": "slim-lang-loader",
-  "version": "0.0.7",
+  "name": "animation-loader",
+  "version": "0.0.1",
   "author": "maxpleaner",
-  "description": "webpack loader for slim => html => js",
+  "description": "webpack loader for manipulating gifs and converting to webm",
   "dependencies": {
-    "html-loader": "^0.4.5",
-    "loader-utils": "^1.0.2"
+    "loader-utils": "^1.0.2",
+    "querystring": "^0.2.0",
+    "randomstring": "^1.1.5",
+    "raw-loader": "^0.5.1"
   },
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maxpleaner/slim-lang-loader"
+    "url": "https://github.com/maxpleaner/animation-loader"
   },
   "keywords": [
     "webpack",
-    "slim-lang",
-    "slim"
+    "phaser",
+    "webm",
+    "gif",
+    "animation"
   ],
   "licenses": [
     {
