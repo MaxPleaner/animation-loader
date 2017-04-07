@@ -99,8 +99,9 @@ Only gifs can receive modifications (so far), but the modified gifs can be conve
 
 ### Other notes
 
-The `webm_overlay_assets` folder will grow in size as the project gets used for longer. Since everything in there can be dynamically generated, it should be
-occasionally cleared out and also added to `.gitignore`.
+The `.animation-loader` folder is where the modified assets are stored. It is automatically created.
+It is cleared out every time the server starts. Perhaps in the future it will implement caching that persists across restarts.
+It can be added to `.gitignore` since everything in there is dynamically generated.
 
 Phaser has a way to scale videos, so resizing them in a preprocessor is not
 necessarily needed. However it can improve the performance. Also, scaling in
@@ -120,10 +121,76 @@ console.log the_path
 # => "/home/max/my_game/octopus.gif"
 ```
 
-Anything else is found in the query params. Here is the full list of keys:
+With the exception of `merge`, everything else is found in the query params. Here is the full list of keys:
 
-- `transparent` if this is truthy then the following keys are checked (only `color` is required):
-    - `color` a hex code like `000000` (black) or `FFFFFF` (white)
-    - `fuzz` (defaults to 25) the percent leniency when turning color into transparency
+- `transparent` if this is truthy then the following keys are checked  
+    - `color` a hex code like `000000` (black) or `FFFFFF` (white). Defaults to black.
+    - `fuzz` the percent leniency when turning color into transparency. Defaults to 25
 - `resize` the value is a width/height such as `"1400x1400"`
-- `to_webm` a boolean. the output path will be webm
+- `to_webm` a boolean. the output path will be webm 
+- `name` - used to identify a gif so it can be merged with another.  
+  If provided, this also becomes the final filename, i.e.
+  `.animation-loader/foo.gif` if `foo` is the name.
+
+Merging:
+
+Conceptually this takes two existing files and creates a new one, combing them.
+However, Webpack doesn't make it easy to write a loader which is passed a filepath that _doesnt yet exist_.
+(I think it is possible with a plugin, but that will require some work). To get around this, the loader
+automatically creates an empty `.merge.gif` file at the root of the project that can be required to start a merge command.
+This can be added to `.gitignore` of course.
+
+If a source file is in the `lib/` directory, for example, the require path will need to be modified:
+`require '../.merge.gif'` and if the source file is in the root of the repo, it would be `require '.merge.gif'`
+
+If this file is passed to require, then three query params need to be present as well:
+
+- `size` width/height e.g. "500x500". Imagemagick needs this info as part of the merge command, even if both gifs are the same size.
+- `background` - the `name` of the image with the lower z-index
+- `foreground` - the `name` of the image with higher z-index (probably the transparent one) 
+
+This loader can't merge webm videos or doing any manipulations on them, so conversion to webm should happen
+as the last step.
+
+The merge command can be passed a 'name' as well. That way multiple merges can be layered.
+
+### Examples
+
+**turn all green in an image to transparent (like a greenscreen)**
+
+`gif_path = require './my_image.gif?transparent=true&color=00FF00'`
+
+**make only a very specific color transparent (set fuzz to 0)**
+
+`gif_path = require './my_image.gif?transparent=true&color=F3F4F5&fuzz=0'`
+
+**resize a gif**
+
+`gif_path = require './my_image.gif?resize=500x500'`
+
+**convert to webm (note that this works with any of the other commands)**
+
+`webm_path = require './my_image.gif?to_webm'`
+
+**referencing a dynamically generated gif by setting its `name`**
+
+The path will be `"./.animation-loader/<name>.<ext>"`,
+where `<ext>` is gif unless `to_webm` was specified, in which case it's webm
+
+However this loader does not yet implement any transformations for webm, so webm paths are
+never passed to require. 
+
+```coffee
+gif_version = require './my_image.gif?resize=100x200&name=gif_version'
+webm_version = require './.animation-loader/gif_version.gif?to_webm=true'
+```
+
+Since the `.animation-loader` folder is in the root of the repo the path may have to be adjusted depending on the location of the file.
+
+**merge a background with a partly-transparent foreground**
+
+```coffee
+foreground = require './my_image.gif?transparent=true&name=foreground'
+background = require './my_image.gif?name=background'
+merged = require './.merge.gif?size=200x200&background=background&foreground=foreground&name=merged'
+```
