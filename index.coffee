@@ -21,7 +21,7 @@ fs = require 'fs'
 # Assets should not be manually placed in here.
 # It is emptied whenever the server starts
 #
-asset_dir = ".animation-loader"
+asset_dir = "./.animation-loader"
 exec_sync """
   rm -rf #{asset_dir}
   mkdir -p #{asset_dir}
@@ -115,13 +115,16 @@ get_num_frames = (path) ->
   num_frames = frames_text.split(" ").length
   num_frames
 
-# In case the second is shorter than the first, it needs to be looped.
+# In case the background is shorter than the foreground, it needs to be looped.
 # the output of this method is a string like "0-16,0-9" representing the
 # sequences of frames to play
 #
-build_frames_ranges = (bg_frames, fg_frames) ->
+# This doesn't yet support backgrounds that are longer than foregrounds;
+# they will be automatically shortened
+#
+build_bg_frame_ranges = (bg_frames, fg_frames) ->
   if fg_frames < bg_frames
-    "0-#{fg_frames-1}"
+    "0-#{fg_frames-2}" # Don't know why, but it's -2 and not -1
   else
     full_bg = "0-#{bg_frames-1}"
     full_loops = Math.floor(fg_frames / bg_frames)
@@ -132,32 +135,48 @@ build_frames_ranges = (bg_frames, fg_frames) ->
       result += "0-#{remainder-1}"
     result
 
-to_merged = ({background, foreground, size}) ->
-  console.log("merging".yellow)
+DeferMerge = ->
+DeferMerge.prototype = new Error()
 
+file_ready = (path) ->
+  fs.existsSync path
+
+to_merged = ({background, foreground, size}) ->
   new_path = gen_path("gif")
   [tmp1, tmp2] = (gen_path("png") for [1..2])
   bg_path = "#{asset_dir}/#{background}.gif"
   fg_path = "#{asset_dir}/#{foreground}.gif"
-  unless [bg_path, fg_path].every fs.existsSync
+  if !([bg_path, fg_path].every file_ready)
     console.log "deferring merge".yellow
-    throw("not really an error") 
+    throw new DeferMerge
 
   bg_frames = get_num_frames bg_path
   fg_frames = get_num_frames fg_path
-  frames_ranges = build_frames_ranges(bg_frames, fg_frames)
-  console.log("#{background} #{foreground} #{frames_range}".blue)
+  bg_frame_ranges = build_bg_frame_ranges(bg_frames, fg_frames)
+  console.log """
+    merging 
+      #{background}(#{bg_frame_ranges}) 
+      #{foreground}(#{fg_frames})
+  """.blue
   exec_sync """
-    montage -background none #{fg_path} -tile x1@ -geometry +0+0 #{tmp1}
-    montage #{bg_path}[#{frames_ranges}] -tile x1@ -geometry +0+0 #{tmp2}
+    montage                        \
+      -background none             \
+      #{fg_path}                   \
+      -tile x1@ -geometry +0+0     \
+      #{tmp1}
+
+    montage                        \
+      #{bg_path}[#{bg_frame_ranges}] \
+      -tile x1@ -geometry +0+0     \
+      #{tmp2}
+
     convert                             \
       -delay 10 -loop 0 #{tmp2} #{tmp1} \
       -coalesce -flatten                \
       -crop #{size} +repage             \
       #{new_path}
-    rm #{tmp1} #{tmp2}
   """
-
+  # rm #{tmp1} #{tmp2}
   new_path
 
 # The entry point of this loader.
@@ -177,7 +196,7 @@ compile_video = (remaining_request) ->
   merge = full_path.endsWith ".merge.gif"
 
   path = "#{asset_dir}/#{randomstring.generate()}.gif"
-  exec_sync "cp #{full_path} #{path}"
+  exec_sync "cp #{full_path} #{path}" unless merge
 
   console.log "compiling gif: #{full_path} with params:".yellow
   console.log query
@@ -192,7 +211,10 @@ compile_video = (remaining_request) ->
     if merge
       path = to_merged({background, foreground, size})
   catch error
-    failed = true
+    if error instanceof DeferMerge
+      failed = true
+    else
+      throw error
 
   return if failed
 
@@ -211,7 +233,11 @@ compile_video = (remaining_request) ->
   if name
     ext = if to_webm then "webm" else "gif"
     new_path = "#{asset_dir}/#{name}.#{ext}"
-    exec_sync "mv #{path} #{new_path}"
+
+    exec_sync("rm #{new_path}") if fs.existsSync(new_path)
+    exec_sync """
+      mv #{path} #{new_path}
+    """
     path = new_path
 
   path

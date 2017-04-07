@@ -154,14 +154,19 @@ If a source file is in the `lib/` directory, for example, the require path will 
 
 If this file is passed to require, then three query params need to be present as well:
 
-- `size` width/height e.g. "500x500". Imagemagick needs this info as part of the merge command, even if both gifs are the same size.
+- `size` width/height e.g. "500x500". Imagemagick needs this info as part of the merge command, even if both gifs are the same size. Note this is **not** used to resize. If smaller than the original, it will **crop** an area starting at the top left.
 - `background` - the `name` of the image with the lower z-index
-- `foreground` - the `name` of the image with higher z-index (probably the transparent one) 
+- `foreground` - the `name` of the image with higher z-index (probably the transparent one)
 
 This loader can't merge webm videos or doing any manipulations on them, so conversion to webm should happen
 as the last step.
 
 The merge command can be passed a 'name' as well. That way multiple merges can be layered.
+
+Keep in mind here that if image C is a merged version of images A and B, it will
+not auto-update when either of these have changed. The only way to force that
+to happen without restarting the server is to change the value of `name` for
+the merge asset.
 
 ### Examples
 
