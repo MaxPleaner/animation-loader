@@ -6,9 +6,21 @@ a temporary path of a modified gif or webm.
 
 Only gifs can receive modifications (so far), but the modified gifs can be converted to webm (preserving resizing and transparency).
 
+Gifs can also be merged, creating multi-layered animations that make use of
+the transparency.
+
+The inspiration for writing with this was the Phaser.js example of webm video
+with an alpha channel. Gifs only have a pseudo alpha channel but there are much
+more accessible tools for manipulating them. Plus with some help I managed to
+convert transparent gifs to transparent webms. Once I'd gathered shell scripts
+to do these things, I wondered how it would work in a webpack loader. Thus
+this project was borne. 
+
 ### Building a sample webpack application with animation-loader
 
 1. _NPM packages_  
+
+    the package is on NPM.
 
     ```sh
     npm install --save webpack webpack-dev-server
@@ -194,3 +206,21 @@ foreground = require './my_image.gif?transparent=true&name=foreground'
 background = require './my_image.gif?name=background'
 merged = require './.merge.gif?size=200x200&background=background&foreground=foreground&name=merged'
 ```
+
+**merge on a merge**
+
+in this example, img2 is made transparent on black and merge1 is made transparent
+on green.
+
+```coffee
+img1 = require './img1.gif?name=img1&resize=100x100'
+img2 = require './img2.gif?name=img2&resize=100x100&transparent=true'
+img3 = require './img3.gif?name=img2&resize=100x100'
+
+merge1 = require './.merge.gif?name=merge1&background=img1&foreground=img2&size=100x100&transparent'
+merge2 = require './.merge.gif?name=merge2&background=img3&foreground=merge1&size=100x100'
+```
+
+Here's an example of an image created with this technique:
+
+![crazy image](./merged.gif)
