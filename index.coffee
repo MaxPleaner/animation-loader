@@ -1,18 +1,20 @@
+# String#blue and stuff
 require 'colors'
 
+# Webpack loader boiler
 loader_utils = require 'loader-utils'
 
 # node's method to execute shell commands synchronously
-#
 exec_sync = require('child_process').execSync
 
 # parse query params into objects. Note that only one top level hash is allowed.
-#
 querystring_parser = require 'querystring'
 
 # random string generator
-#
 randomstring = require 'randomstring'
+
+# filesystem
+fs = require 'fs'
 
 # This loader works by creating temporary, modified versions of gifs.
 # all of these are placed into a single folder, which is created here.
@@ -35,13 +37,6 @@ gen_path = (extension)->
 #
 gen_tmp_png_path = ->
   "#{asset_dir}/#{randomstring.generate()}%03d.png"
-
-# assets are tracked in a hash if the 'name' param is given.
-# otherwise, there is no stateful record of the path other than the return value of require.
-# giving a name enables them to be used in merge and gives them a custom filename,
-# i.e. <project_root>/.animation_loader/foo.gif if 'foo' is the name.
-# 
-global.animation_loader_named_paths = {}
 
 # all of these operations remove the path given to them
 # after they've created a new file with modification. 
@@ -122,7 +117,7 @@ get_num_frames = (path) ->
 
 # In case the second is shorter than the first, it needs to be looped.
 # the output of this method is a string like "0-16,0-9" representing the
-# sequences of frames to play.
+# sequences of frames to play
 #
 build_frames_ranges = (bg_frames, fg_frames) ->
   if fg_frames < bg_frames
@@ -142,15 +137,16 @@ to_merged = ({background, foreground, size}) ->
 
   new_path = gen_path("gif")
   [tmp1, tmp2] = (gen_path("png") for [1..2])
-  bg_path = animation_loader_named_paths[background]
-  fg_path = animation_loader_named_paths[foreground]
-  unless bg_path && fg_path
+  bg_path = "#{asset_dir}/#{background}.gif"
+  fg_path = "#{asset_dir}/#{foreground}.gif"
+  unless [bg_path, fg_path].every fs.existsSync
     console.log "deferring merge".yellow
     throw("not really an error") 
 
   bg_frames = get_num_frames bg_path
   fg_frames = get_num_frames fg_path
   frames_ranges = build_frames_ranges(bg_frames, fg_frames)
+  console.log("#{background} #{foreground} #{frames_range}".blue)
   exec_sync """
     montage -background none #{fg_path} -tile x1@ -geometry +0+0 #{tmp1}
     montage #{bg_path}[#{frames_ranges}] -tile x1@ -geometry +0+0 #{tmp2}
@@ -212,14 +208,11 @@ compile_video = (remaining_request) ->
 
     path = to_webm_alpha(path)
 
-  console.log "done".green
-
   if name
     ext = if to_webm then "webm" else "gif"
     new_path = "#{asset_dir}/#{name}.#{ext}"
     exec_sync "mv #{path} #{new_path}"
     path = new_path
-    animation_loader_named_paths[name] = path
 
   path
   

@@ -115,10 +115,7 @@ The `.animation-loader` folder is where the modified assets are stored. It is au
 It is cleared out every time the server starts. Perhaps in the future it will implement caching that persists across restarts.
 It can be added to `.gitignore` since everything in there is dynamically generated.
 
-Phaser has a way to scale videos, so resizing them in a preprocessor is not
-necessarily needed. However it can improve the performance. Also, scaling in
-Phaser is done with percentages and not width/height so it's probably easier to
-use the preprocessor anyway.
+Phaser and HTML have a way to scale videos, so resizing them in a preprocessor is not necessarily needed. However it can improve the performance.
 
 ### API details
 
@@ -224,3 +221,11 @@ merge2 = require './.merge.gif?name=merge2&background=img3&foreground=merge1&siz
 Here's an example of an image created with this technique:
 
 ![crazy image](./merged.gif)
+
+### Source code
+
+This is written in coffeescript, but it's all in one file, so compilation is
+done through `coffee -wc index.coffee` which updates `index.js` (the entry
+point specified in `package.json`).
+
+The file has comments, and of course contribution is valued.
