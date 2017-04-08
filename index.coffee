@@ -155,8 +155,8 @@ to_merged = ({background, foreground, size}) ->
   bg_frame_ranges = build_bg_frame_ranges(bg_frames, fg_frames)
   console.log """
     merging 
-      #{background}(#{bg_frame_ranges}) 
-      #{foreground}(#{fg_frames})
+      bg: #{background}(#{bg_frame_ranges}) 
+      fg: #{foreground}(#{fg_frames})
   """.blue
   exec_sync """
     montage                        \
@@ -175,9 +175,22 @@ to_merged = ({background, foreground, size}) ->
       -coalesce -flatten                \
       -crop #{size} +repage             \
       #{new_path}
+
+    rm #{tmp1} #{tmp2}
   """
-  # rm #{tmp1} #{tmp2}
-  new_path
+
+  # There's sometimes a bug where the merged gif is correct for the correct
+  # length, but there are extra frames with glitchy stuff.
+  #
+  # To circumvent this the image gets cropped to the expected length.
+  #
+  new_path_2 = gen_path("gif")
+  exec_sync """
+    convert #{new_path}[0-#{fg_frames - 2}] #{new_path_2}
+    rm #{new_path}
+  """
+
+  new_path_2
 
 # The entry point of this loader.
 # It gets passed a full path with query params at the end.

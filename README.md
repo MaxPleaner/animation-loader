@@ -223,7 +223,7 @@ merge1 = require './.merge.gif?name=merge1&background=img1&foreground=img2&size=
 merge2 = require './.merge.gif?name=merge2&background=img3&foreground=merge1&size=100x100'
 ```
 
-Here's an example of an image created with this technique:
+Here's an example of an image created with this technique (no less than 6 gifs overlaid):
 
 ![crazy image](./merged.gif)
 

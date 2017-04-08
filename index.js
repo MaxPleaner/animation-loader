@@ -100,7 +100,7 @@
   };
 
   to_merged = function(arg) {
-    var background, bg_frame_ranges, bg_frames, bg_path, fg_frames, fg_path, foreground, new_path, ref, size, tmp1, tmp2;
+    var background, bg_frame_ranges, bg_frames, bg_path, fg_frames, fg_path, foreground, new_path, new_path_2, ref, size, tmp1, tmp2;
     background = arg.background, foreground = arg.foreground, size = arg.size;
     new_path = gen_path("gif");
     ref = (function() {
@@ -120,9 +120,11 @@
     bg_frames = get_num_frames(bg_path);
     fg_frames = get_num_frames(fg_path);
     bg_frame_ranges = build_bg_frame_ranges(bg_frames, fg_frames);
-    console.log(`merging \n  ${background}(${bg_frame_ranges}) \n  ${foreground}(${fg_frames})`.blue);
-    exec_sync(`montage                        -background none             ${fg_path}                   -tile x1@ -geometry +0+0     ${tmp1}\n\nmontage                        ${bg_path}[${bg_frame_ranges}] -tile x1@ -geometry +0+0     ${tmp2}\n\nconvert                             -delay 10 -loop 0 ${tmp2} ${tmp1} -coalesce -flatten                -crop ${size} +repage             ${new_path}`);
-    return new_path;
+    console.log(`merging \n  bg: ${background}(${bg_frame_ranges}) \n  fg: ${foreground}(${fg_frames})`.blue);
+    exec_sync(`montage                        -background none             ${fg_path}                   -tile x1@ -geometry +0+0     ${tmp1}\n\nmontage                        ${bg_path}[${bg_frame_ranges}] -tile x1@ -geometry +0+0     ${tmp2}\n\nconvert                             -delay 10 -loop 0 ${tmp2} ${tmp1} -coalesce -flatten                -crop ${size} +repage             ${new_path}\n\nrm ${tmp1} ${tmp2}`);
+    new_path_2 = gen_path("gif");
+    exec_sync(`convert ${new_path}[0-${fg_frames - 2}] ${new_path_2}\nrm ${new_path}`);
+    return new_path_2;
   };
 
   compile_video = function(remaining_request) {
