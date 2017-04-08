@@ -115,19 +115,19 @@ The `.animation-loader` folder is where the modified assets are stored. It is au
 It is cleared out every time the server starts. Perhaps in the future it will implement caching that persists across restarts.
 It can be added to `.gitignore` since everything in there is dynamically generated.
 
-Phaser and HTML have a way to scale videos, so resizing them in a preprocessor is not necessarily needed. However it can improve the performance.
+Phaser and HTML have a way to scale videos, so resizing them in a preprocessor is not necessarily needed. However it can improve the performance and also it will likely be buggy to try and merge two images of different sizes.
 
 ### API details
 
 Once the webpack setup is in place, there's only one place this loader becomes relevant and that's `require`. With the proper
 `test` definition in `webpack.config.js` (shown above), `gif` paths passed to `require` will pass through both the raw-loader and animation-loader.
 
-If nothing else is given besides the path, the return value will be the absolute path:
+If nothing else is given besides the path, the return value will be a tempoary path pointing to the image
 
 ```coffee
 the_path = require './octopus.gif'
 console.log the_path 
-# => "/home/max/my_game/octopus.gif"
+# => ".animation-loader/kasmdaknsduiasdkasdm.gif"
 ```
 
 With the exception of `merge`, everything else is found in the query params. Here is the full list of keys:
