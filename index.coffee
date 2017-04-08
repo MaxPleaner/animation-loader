@@ -28,12 +28,13 @@ exec_sync """
   touch .merge.gif
 """
 
-# Their paths are random
+# Their paths are random, although if the 'name' param is given
+# then the file will be renamed to have that identifier. 
 #
 gen_path = (extension)->
   "#{asset_dir}/#{randomstring.generate()}.#{extension}"
 
-# Some temporary png files are created sometimes
+# Some temporary png files are created during the conversion to webm
 #
 gen_tmp_png_path = ->
   "#{asset_dir}/#{randomstring.generate()}%03d.png"
@@ -42,19 +43,6 @@ gen_tmp_png_path = ->
 # after they've created a new file with modification. 
 # that's why compile_video does an initial copy -
 # that way the original isn't destroyed.
-
-# If the 'transparent=true' query param is given,
-# then two additional params will be checked:
-#
-# - fuzz 
-#     - the amount of lenience to give when making a color transparent).
-#     - a number from 0 (exact color match) to 100 (everything is transparent)
-#
-# - color
-#     - a hexadecimal code, i.e. "000000" for black or "FFFFFF" for white
-#     - this can be determined using a color picker tool such as gpick
-#
-# This requires imagemagick to be installed on the system.
 #
 to_transparent_gif = (in_gif_path, color, fuzz) ->
   console.log "making transparent".yellow
@@ -179,7 +167,8 @@ to_merged = ({background, foreground, size}) ->
     rm #{tmp1} #{tmp2}
   """
 
-  # There's sometimes a bug where the merged gif is correct for the correct
+  # If the images being merged are not the same size,
+  # there will be a bug where the merged gif is correct for the correct
   # length, but there are extra frames with glitchy stuff.
   #
   # To circumvent this the image gets cropped to the expected length.
