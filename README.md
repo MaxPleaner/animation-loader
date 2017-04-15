@@ -90,7 +90,7 @@ this project was borne.
     ```coffee
     $ = require 'jquery'
     $ ->
-      webm_path = require "./octopus.gif?transparent=true&color=00AEFF&resize=150x100"
+      webm_path = require "./octopus.gif?transparent=true&color=00AEFF&resize=150x100&to_webm=true"
       $("body").append($ """
         <video autoplay loop src="./#{foo}">
       """)
